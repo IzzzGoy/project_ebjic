@@ -1,0 +1,45 @@
+#ifndef SERVER_H
+#define SERVER_H
+#include "sys/types.h"
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "pthread.h"
+#include "unistd.h"
+#include "vector"
+#include "chrono"
+#include "thread"
+#include "fcntl.h"
+#include "iostream"
+#include "signal.h"
+
+class Server
+{
+    struct info
+    {
+        sockaddr_in cli_addr;
+        int serv_sock;
+        info(sockaddr_in cli_addr,int serv_sock) 
+        {
+            this->cli_addr = cli_addr;
+            this->serv_sock = serv_sock;
+        }
+    };
+private:
+    bool pause = false;
+    int _socket;
+    sockaddr_in server_addr;
+    bool state = true;
+    std::vector<pthread_t> threads;
+    std::vector<info> clients;
+public:
+    void handl_usr1(int nsig)
+    {
+        state = false;
+    }
+    Server();
+    ~Server();
+    void server_init();
+    static void* work_with_client(void* arg);
+};
+
+#endif // SERVER_H
